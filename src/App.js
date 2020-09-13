@@ -66,7 +66,7 @@ function App() {
               className='popup__input popup__input_field_avatar'
               required
             />
-            <span className='popup__input-error' id='input-update-avatar-error'></span>
+            <span className='popup__input-error' id='input-update-avatar-error' />
           </label>
           <button type='submit' className='popup__save'>
             Сохранить
@@ -89,7 +89,7 @@ function App() {
               minLength='2'
               maxLength='40'
             />
-            <span className='popup__input-error' id='input-profile-name-error'></span>
+            <span className='popup__input-error' id='input-profile-name-error' />
           </label>
           <label htmlFor='input-profile-about' className='popup__field'>
             <input
@@ -102,7 +102,7 @@ function App() {
               minLength='2'
               maxLength='200'
             />
-            <span className='popup__input-error' id='input-profile-about-error'></span>
+            <span className='popup__input-error' id='input-profile-about-error' />
           </label>
           <button type='submit' className='popup__save'>
             Сохранить
@@ -120,7 +120,7 @@ function App() {
               minLength='1'
               maxLength='30'
             />
-            <span className='popup__input-error' id='input-addcard-location-error'></span>
+            <span className='popup__input-error' id='input-addcard-location-error' />
           </label>
           <label htmlFor='input-addcard-image' className='popup__field'>
             <input
@@ -131,7 +131,7 @@ function App() {
               className='popup__input popup__input_field_image'
               required
             />
-            <span className='popup__input-error' id='input-addcard-image-error'></span>
+            <span className='popup__input-error' id='input-addcard-image-error' />
           </label>
           <button type='submit' className='popup__save'>
             Создать
