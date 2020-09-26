@@ -4,15 +4,37 @@ import PopupWithForm from './PopupWithForm';
 
 function AddPlacePopup(props) {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [name, setName] = React.useState('');
-  const [link, setLink] = React.useState('');
+  const [inputValues, setInputValues] = React.useState({
+    location: { value: '', validationMessage: true },
+    image: { value: '', validationMessage: true },
+    isFormValid: false,
+  });
+
+  const handleInputChange = (e) => {
+    setInputValues({
+      ...inputValues,
+      [e.target.name]: {
+        value: e.target.value,
+        validationMessage: e.target.validationMessage,
+        isValid: !e.target.validationMessage,
+      },
+      isFormValid:
+        !e.target.validationMessage &&
+        !Object.keys(inputValues).some((key) => {
+          if (key !== e.target.name && key !== 'isFormValid') {
+            return inputValues[key].validationMessage;
+          }
+          return false;
+        }),
+    });
+  };
 
   function handleSubmit(e) {
     e.preventDefault();
     props.onAddPlace(
       {
-        name,
-        link,
+        name: inputValues.location.value,
+        link: inputValues.image.value,
       },
       setIsLoading
     );
@@ -30,10 +52,12 @@ function AddPlacePopup(props) {
           required
           minLength='1'
           maxLength='30'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={inputValues.location.value}
+          onChange={handleInputChange}
         />
-        <span className='popup__input-error' id='input-addcard-location-error' />
+        <span className='popup__input-error' id='input-addcard-location-error'>
+          {inputValues.location.validationMessage}
+        </span>
       </label>
       <label htmlFor='input-addcard-image' className='popup__field'>
         <input
@@ -42,13 +66,15 @@ function AddPlacePopup(props) {
           id='input-addcard-image'
           placeholder='Ссылка на картинку'
           className='popup__input popup__input_field_image'
-          value={link}
-          onChange={(e) => setLink(e.target.value)}
+          value={inputValues.image.value}
+          onChange={handleInputChange}
           required
         />
-        <span className='popup__input-error' id='input-addcard-image-error' />
+        <span className='popup__input-error' id='input-addcard-image-error'>
+          {inputValues.image.validationMessage}
+        </span>
       </label>
-      <button type='submit' className='popup__save'>
+      <button type='submit' className='popup__save' disabled={!inputValues.isFormValid}>
         {isLoading ? 'Создание...' : 'Создать'}
       </button>
     </PopupWithForm>

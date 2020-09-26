@@ -3,7 +3,7 @@ import Popup from './Popup';
 
 export default function PopupWithImage(props) {
   return (
-    <Popup isOpen={props.card ? true : false} onClose={props.onClose}>
+    <Popup isOpen={props.isOpen} onClose={props.onClose}>
       <figure className='popup__figure'>
         <img
           src={props.card ? props.card.link : '#'}

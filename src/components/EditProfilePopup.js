@@ -6,22 +6,62 @@ import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
 
 function EditProfilePopup(props) {
   const currentUser = React.useContext(CurrentUserContext);
-  const [name, setName] = React.useState('');
-  const [description, setDescription] = React.useState('');
+  // const [name, setName] = React.useState('');
+  // const [description, setDescription] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
 
+  const [inputValues, setInputValues] = React.useState({
+    name: { value: '', validationMessage: true },
+    about: { value: '', validationMessage: true },
+    isFormValid: false,
+  });
+
   React.useEffect(() => {
-    setName(currentUser.name);
-    setDescription(currentUser.about);
+    // setName(currentUser.name);
+    // setDescription(currentUser.about);
+
+    setInputValues({
+      ...inputValues,
+      name: {
+        value: currentUser.name,
+        validationMessage: '',
+        isValid: true,
+      },
+      about: {
+        value: currentUser.about,
+        validationMessage: '',
+        isValid: true,
+      },
+      isFormValid: true,
+    });
   }, [currentUser]);
+
+  const handleInputChange = (e) => {
+    setInputValues({
+      ...inputValues,
+      [e.target.name]: {
+        value: e.target.value,
+        validationMessage: e.target.validationMessage,
+        isValid: !e.target.validationMessage,
+      },
+      isFormValid:
+        !e.target.validationMessage &&
+        !Object.keys(inputValues).some((key) => {
+          if (key !== e.target.name && key !== 'isFormValid') {
+            return inputValues[key].validationMessage;
+          }
+          return false;
+        }),
+    });
+  };
 
   function handleSubmit(e) {
     e.preventDefault();
 
     props.onUpdateUser(
       {
-        name,
-        about: description,
+        name: inputValues.name.value,
+        about: inputValues.about.value,
       },
       setIsLoading
     );
@@ -38,10 +78,12 @@ function EditProfilePopup(props) {
           required
           minLength='2'
           maxLength='40'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={inputValues.name.value}
+          onChange={handleInputChange}
         />
-        <span className='popup__input-error' id='input-profile-name-error' />
+        <span className='popup__input-error' id='input-profile-name-error'>
+          {inputValues.name.validationMessage}
+        </span>
       </label>
       <label htmlFor='input-profile-about' className='popup__field'>
         <input
@@ -52,12 +94,14 @@ function EditProfilePopup(props) {
           required
           minLength='2'
           maxLength='200'
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          value={inputValues.about.value}
+          onChange={handleInputChange}
         />
-        <span className='popup__input-error' id='input-profile-about-error' />
+        <span className='popup__input-error' id='input-profile-about-error'>
+          {inputValues.about.validationMessage}
+        </span>
       </label>
-      <button type='submit' className='popup__save'>
+      <button type='submit' className='popup__save' disabled={!inputValues.isFormValid}>
         {isLoading ? 'Сохранение...' : 'Сохранить'}
       </button>
     </PopupWithForm>

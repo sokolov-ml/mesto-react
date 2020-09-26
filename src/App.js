@@ -4,11 +4,11 @@ import api from './components/utils/Api';
 import Header from './components/Header';
 import Main from './components/Main';
 import Footer from './components/Footer';
-import PopupWithForm from './components/PopupWithForm';
 import PopupWithImage from './components/PopupWithImage';
 import EditAvatarPopup from './components/EditAvatarPopup';
 import EditProfilePopup from './components/EditProfilePopup';
 import AddPlacePopup from './components/AddPlacePopup';
+import RemoveCardPopup from './components/RemoveCardPopup';
 
 import { CurrentUserContext } from './contexts/CurrentUserContext.js';
 
@@ -21,13 +21,20 @@ function App() {
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
   const [isRemoveCardPopupOpen, setIsRemoveCardPopupOpen] = React.useState(false);
+  const [isViewCardPopupOpen, setIsViewCardPopupOpen] = React.useState(false);
 
   const [selectedCard, setSelectedCard] = React.useState();
   const [currentUser, setCurrentUser] = React.useState({ name: '', about: '', avatar: imgAvatar });
   // const currentUser = React.createContext();
 
   const [cards, setCards] = React.useState([]);
+
   React.useEffect(() => {
+    // setInterval(getCards, 10000);
+    getCards();
+  }, []);
+
+  function getCards() {
     api
       .getCards()
       .then((result) => {
@@ -35,33 +42,6 @@ function App() {
       })
       .catch(() => {
         console.error('can`t get userInfo');
-      });
-  }, []);
-
-  function handleCardLike(cardId, isLiked) {
-    if (isLiked) {
-      return api.setLikeCardOff(cardId).catch(() => {
-        console.error('can`t unset like');
-      });
-    } else {
-      return api.setLikeCardOn(cardId).catch(() => {
-        console.error('can`t set like');
-      });
-    }
-  }
-
-  function handleCardDelete(cardId) {
-    api
-      .removeCard(cardId)
-      .then(() => {
-        setCards(cards.filter((card) => card._id !== cardId));
-        // popupRemoveCard.close();
-      })
-      .catch(() => {
-        console.error('can`t delete cards');
-      })
-      .finally(() => {
-        // popupRemoveCard._saveButton.textContent = 'Да';
       });
   }
 
@@ -91,11 +71,59 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
     setIsRemoveCardPopupOpen(false);
+    setIsViewCardPopupOpen(false);
     setSelectedCard();
   }
 
   function handleCardClick(card) {
     setSelectedCard(card);
+    setIsViewCardPopupOpen(true);
+  }
+
+  function handleCardLike(card) {
+    const isLiked = card.likes.some((i) => i._id === currentUser._id);
+    if (isLiked) {
+      return api
+        .setLikeCardOff(card._id)
+        .then((newCard) => {
+          const newCards = cards.map((c) => (c._id === card._id ? newCard : c));
+          setCards(newCards);
+        })
+        .catch(() => {
+          console.error('can`t unset like');
+        });
+    } else {
+      return api
+        .setLikeCardOn(card._id)
+        .then((newCard) => {
+          const newCards = cards.map((c) => (c._id === card._id ? newCard : c));
+          setCards(newCards);
+        })
+        .catch(() => {
+          console.error('can`t set like');
+        });
+    }
+  }
+
+  function handleCardRemove(card) {
+    setSelectedCard(card);
+    setIsRemoveCardPopupOpen(true);
+  }
+
+  function handleOnDeleteCard(func) {
+    func(true);
+    api
+      .removeCard(selectedCard._id)
+      .then(() => {
+        setCards(cards.filter((card) => card._id !== selectedCard._id));
+        closeAllPopups();
+      })
+      .catch(() => {
+        console.error('can`t delete cards');
+      })
+      .finally(() => {
+        func(false);
+      });
   }
 
   function handleUpdateUser(obj, func) {
@@ -158,7 +186,7 @@ function App() {
           onEditAvatar={handleEditAvatarClick}
           onCardClick={handleCardClick}
           onCardLike={handleCardLike}
-          onCardDelete={handleCardDelete}
+          onCardRemove={handleCardRemove}
         >
           <EditAvatarPopup
             isOpen={isEditAvatarPopupOpen}
@@ -167,14 +195,21 @@ function App() {
           />
           <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} />
 
-          <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlaceSubmit} />
+          <AddPlacePopup
+            key={Math.random()}
+            isOpen={isAddPlacePopupOpen}
+            onClose={closeAllPopups}
+            onAddPlace={handleAddPlaceSubmit}
+          />
 
-          <PopupWithForm title='Вы уверены?' name='remove-card' isOpen={isRemoveCardPopupOpen} onClose={closeAllPopups}>
-            <button type='submit' className='popup__save'>
-              Да
-            </button>
-          </PopupWithForm>
-          <PopupWithImage card={selectedCard} onClose={closeAllPopups}></PopupWithImage>
+          <RemoveCardPopup
+            card={selectedCard}
+            isOpen={isRemoveCardPopupOpen}
+            onClose={closeAllPopups}
+            onDeleteCard={handleOnDeleteCard}
+          />
+
+          <PopupWithImage card={selectedCard} isOpen={isViewCardPopupOpen} onClose={closeAllPopups}></PopupWithImage>
         </Main>
         <Footer />
       </div>

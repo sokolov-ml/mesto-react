@@ -1,13 +1,17 @@
 import React from 'react';
 import PopupWithForm from './PopupWithForm';
 
+// import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
+
 function EditAvatarPopup({ onUpdateAvatar, ...props }) {
+  // const currentUser = React.useContext(CurrentUserContext);
+
   const inputAvatar = React.useRef();
   const [isLoading, setIsLoading] = React.useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(inputAvatar.current.value);
+
     onUpdateAvatar(
       {
         avatar: inputAvatar.current.value,
@@ -28,7 +32,9 @@ function EditAvatarPopup({ onUpdateAvatar, ...props }) {
           className='popup__input popup__input_field_avatar'
           required
         />
-        <span className='popup__input-error' id='input-update-avatar-error' />
+        <span className='popup__input-error' id='input-update-avatar-error'>
+          {inputAvatar.current && inputAvatar.current.validationMessage}
+        </span>
       </label>
       <button type='submit' className='popup__save'>
         {isLoading ? 'Сохранение...' : 'Сохранить'}
